@@ -23,8 +23,16 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthPage extends StatelessWidget {
+class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -34,6 +42,17 @@ class AuthPage extends StatelessWidget {
       idToken: googleAuth?.idToken,
     );
     return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<void> signInWithEmail() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+    } catch (e) {
+      print("Error: $e");
+    }
   }
 
   @override
@@ -50,6 +69,23 @@ class AuthPage extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: "Email"),
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: "Password"),
+              obscureText: true,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: signInWithEmail,
+              child: const Text("Sign in with Email"),
+            ),
+            const SizedBox(height: 10),
             ElevatedButton.icon(
               onPressed: signInWithGoogle,
               icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white),
